@@ -29,6 +29,26 @@ bb-browser site reddit/thread <url>        # run with args
 | `twitter/user` | `screen_name` | User profile |
 | `twitter/thread` | `tweet_id` | Tweet + all replies (supports URL or numeric ID) |
 
+### Xiaohongshu (小红书)
+| Command | Args | Description |
+|---------|------|-------------|
+| `xiaohongshu/me` | — | Current logged-in user info |
+
+> Note: Xiaohongshu uses request signing (X-s headers). Adapters use XMLHttpRequest to inherit the page's signing automatically.
+
+### GitHub
+| Command | Args | Description |
+|---------|------|-------------|
+| `github/me` | — | Current logged-in user info |
+| `github/repo` | `repo` (owner/repo) | Repository info |
+| `github/issues` | `repo`, `state` (optional) | Issue list |
+
+### Hacker News
+| Command | Args | Description |
+|---------|------|-------------|
+| `hackernews/top` | `count` (optional) | Top stories |
+| `hackernews/thread` | `id` | Post + comment tree |
+
 ## Writing a Site Adapter
 
 ```javascript
