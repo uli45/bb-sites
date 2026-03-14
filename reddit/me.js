@@ -1,7 +1,6 @@
 // @name reddit/me
 // @description 获取当前 Reddit 登录用户信息
 // @domain www.reddit.com
-// @args
 
 async function(args) {
   const resp = await fetch('/api/me.json', {credentials: 'include'});
