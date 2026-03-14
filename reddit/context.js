@@ -16,6 +16,9 @@ async function(args) {
   if (!args.url) return {error: 'Missing argument: url', hint: 'Provide a Reddit comment URL'};
   const path = args.url.replace(/https?:\/\/[^/]*/, '').replace(/\?.*/, '').replace(/\/*$/, '/');
 
+  // Extract comment_id from various URL formats:
+  //   /r/sub/comments/POST_ID/comment/COMMENT_ID/    (new shreddit style)
+  //   /r/sub/comments/POST_ID/slug/COMMENT_ID/       (old style)
   let comment_id = (path.match(/\/comment\/([^/]+)/) || [])[1];
   if (!comment_id) {
     const parts = path.match(/\/comments\/[^/]*\/[^/]*\/([^/]*)/);
@@ -23,7 +26,12 @@ async function(args) {
   }
   if (!comment_id) return {error: 'Cannot extract comment_id from URL', hint: 'Expected: .../comment/<id>/'};
 
-  const resp = await fetch(path + '.json?context=10&raw_json=1', {credentials: 'include'});
+  // Build API URL: /r/sub/comments/POST_ID/COMMENT_ID/.json (the only format that works since 2025)
+  const postMatch = path.match(/(\/r\/[^/]+\/comments\/[^/]+\/)/);
+  if (!postMatch) return {error: 'Cannot extract post path from URL', hint: 'Expected: /r/sub/comments/POST_ID/...'};
+  const apiPath = postMatch[1] + comment_id + '/';
+
+  const resp = await fetch(apiPath + '.json?context=10&raw_json=1', {credentials: 'include'});
   if (!resp.ok) return {error: 'HTTP ' + resp.status};
   const d = await resp.json();
   if (!d[0]?.data?.children?.[0]?.data) return {error: 'Unexpected response', hint: 'Post may be deleted or URL is incorrect'};

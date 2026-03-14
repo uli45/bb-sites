@@ -15,8 +15,16 @@
 async function(args) {
   let username = args.username;
   if (!username) {
-    const me = await fetch('/api/me.json', {credentials: 'include'}).then(r => r.json());
-    username = me.data?.name;
+    // /api/me.json no longer returns user info (2025+).
+    // Extract user ID from cookie, then resolve username.
+    const idMatch = document.cookie.match(/t2_([a-z0-9]+)_/);
+    if (!idMatch) return {error: 'Cannot determine username', hint: 'Provide username or log in to reddit.com'};
+    const userId = 't2_' + idMatch[1];
+    const idResp = await fetch('/api/user_data_by_account_ids.json?ids=' + userId, {credentials: 'include'});
+    if (idResp.ok) {
+      const idData = await idResp.json();
+      username = idData[userId]?.name;
+    }
     if (!username) return {error: 'Cannot determine username', hint: 'Provide username or log in to reddit.com'};
   }
 

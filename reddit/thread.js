@@ -14,7 +14,11 @@
 
 async function(args) {
   if (!args.url) return {error: 'Missing argument: url', hint: 'Provide a Reddit post URL'};
-  const path = args.url.replace(/https?:\/\/[^/]*/, '').replace(/\?.*/, '').replace(/\/*$/, '/');
+  let path = args.url.replace(/https?:\/\/[^/]*/, '').replace(/\?.*/, '').replace(/\/*$/, '/');
+  // Normalize to /r/sub/comments/POST_ID/ — strip slug and any comment suffixes
+  // Handles: .../comments/ID/slug/, .../comments/ID/comment/CID/, .../comments/ID/slug/CID/
+  const m = path.match(/(\/r\/[^/]+\/comments\/[^/]+\/)/);
+  if (m) path = m[1];
   const resp = await fetch(path + '.json?limit=500&depth=10&raw_json=1', {credentials: 'include'});
   if (!resp.ok) return {error: 'HTTP ' + resp.status};
   const d = await resp.json();
